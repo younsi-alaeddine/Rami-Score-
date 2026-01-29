@@ -4,6 +4,7 @@ import Button from '../components/Button.jsx'
 import Card from '../components/Card.jsx'
 import { getGameById } from '../storage/history.js'
 import { formatDateTime } from '../utils/date.js'
+import { t } from '../utils/i18n.js'
 
 export default function EndGameSummaryPage() {
   const { gameId } = useParams()
@@ -41,17 +42,17 @@ export default function EndGameSummaryPage() {
         <div className="stack">
           <div className="row">
             <div>
-              <h2 style={{ margin: 0 }}>النتيجة النهائية</h2>
+              <h2 style={{ margin: 0 }}>{t('summaryTitle')}</h2>
               <p className="muted" style={{ margin: '6px 0 0' }}>
-                Saved locally • {formatDateTime(game.endedAt || game.createdAt)}
+                {t('summarySubtitle', { date: formatDateTime(game.endedAt || game.createdAt) })}
               </p>
             </div>
-            <span className="pill">{game.type === 'tunisian' ? 'Tunisian Rami' : 'Rami'}</span>
+            <span className="pill">{game.type === 'tunisian' ? t('tunisianRami') : 'Rami'}</span>
           </div>
 
           {winner ? (
             <p style={{ margin: '4px 0 8px', fontWeight: 600 }}>
-              الرابح: <span className="input--mono">{winner.name}</span> (أقل مجموع نقاط)
+              {t('winner', { name: winner.name })}
             </p>
           ) : null}
 
@@ -59,9 +60,9 @@ export default function EndGameSummaryPage() {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Rank</th>
-                  <th>Player</th>
-                  <th>Final Score</th>
+                  <th>{t('rank')}</th>
+                  <th>{t('player')}</th>
+                  <th>{t('totalScore')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -78,10 +79,10 @@ export default function EndGameSummaryPage() {
 
           <div className="row">
             <Button as={Link} to="/new" variant="secondary">
-              New Game
+              {t('newGame')}
             </Button>
             <Button as={Link} to="/history" variant="primary">
-              View History
+              {t('viewHistory')}
             </Button>
           </div>
         </div>

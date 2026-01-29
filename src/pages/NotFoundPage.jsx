@@ -2,20 +2,20 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../components/Button.jsx'
 import Card from '../components/Card.jsx'
+import { t } from '../utils/i18n.js'
 
 export default function NotFoundPage() {
   return (
     <Card>
       <div className="stack">
-        <h2 style={{ margin: 0 }}>Page not found</h2>
+        <h2 style={{ margin: 0 }}>{t('notFound')}</h2>
         <p className="muted" style={{ margin: 0 }}>
-          The page you’re looking for doesn’t exist.
+          {t('notFoundSubtitle')}
         </p>
         <Button as={Link} to="/" variant="primary">
-          Go Home
+          {t('goHome')}
         </Button>
       </div>
     </Card>
   )
 }
-

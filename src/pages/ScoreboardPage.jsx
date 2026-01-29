@@ -1,12 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Button from '../components/Button.jsx'
 import Card from '../components/Card.jsx'
 import { Field, NumberInput } from '../components/Field.jsx'
+import ChatBox from '../components/ChatBox.jsx'
+import { useAuth } from '../components/AuthProvider.jsx'
 import { getCurrentGame, setCurrentGame, clearCurrentGame } from '../storage/currentGame.js'
 import { saveGameToHistory } from '../storage/history.js'
 import { makeId } from '../utils/id.js'
 import { ensureNegativeOrZero, rankPlayers, MAX_TOTAL_SCORE } from '../utils/game.js'
+import { subscribeToGame, updateSharedGame } from '../utils/firebaseGame.js'
+import { updateUserStats } from '../utils/auth.js'
+import { sendSystemMessage } from '../utils/chat.js'
+import { t } from '../utils/i18n.js'
 
 function clampInputString(s) {
   // Allow empty (user typing). Otherwise keep numeric-ish string.
@@ -18,14 +24,46 @@ function clampInputString(s) {
 
 export default function ScoreboardPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const [searchParams] = useSearchParams()
+  const codeFromUrl = searchParams.get('code')
   const [game, setGame] = useState(() => getCurrentGame())
   const [roundValues, setRoundValues] = useState(() => ({}))
   const [error, setError] = useState('')
+  const [isShared, setIsShared] = useState(false)
+  const [shareCode, setShareCode] = useState(null)
 
   useEffect(() => {
     const g = getCurrentGame()
-    setGame(g)
-  }, [])
+    const code = codeFromUrl || g?.code
+    if (g) {
+      setGame(g)
+      setIsShared(!!g.shared || !!code)
+      setShareCode(code)
+      // Update game with code if from URL
+      if (codeFromUrl && !g.code) {
+        const updatedGame = { ...g, code: codeFromUrl, shared: true }
+        setCurrentGame(updatedGame)
+        setGame(updatedGame)
+      }
+    }
+  }, [codeFromUrl])
+
+  // Subscribe to real-time updates if shared game
+  useEffect(() => {
+    if (!isShared || !shareCode) return
+
+    const unsubscribe = subscribeToGame(shareCode, (updatedGame) => {
+      if (updatedGame) {
+        setGame(updatedGame)
+        setCurrentGame(updatedGame)
+      }
+    })
+
+    return () => {
+      if (unsubscribe) unsubscribe()
+    }
+  }, [isShared, shareCode])
 
   const { ranked, totals } = useMemo(() => {
     if (!game) return { ranked: [], totals: {} }
@@ -47,7 +85,7 @@ export default function ScoreboardPage() {
       const value = raw === '' || raw === undefined ? 0 : Number(raw)
       const check = ensureNegativeOrZero(value)
       if (!check.ok) {
-        setError('Round scores must be zero or positive. Negative values are not allowed.')
+        setError(t('enterScore'))
         return
       }
       scores[p.id] = check.value
@@ -75,6 +113,17 @@ export default function ScoreboardPage() {
         finalTotals: nextTotals,
       }
       saveGameToHistory(finalized)
+      
+      // Update user stats
+      if (user?.uid) {
+        updateUserStats(user.uid, finalized).catch(() => {})
+      }
+      
+      // Send system message
+      if (isShared && shareCode) {
+        sendSystemMessage(shareCode, t('gameEndedAuto') || 'La partie s\'est terminée automatiquement (limite atteinte)').catch(() => {})
+      }
+      
       clearCurrentGame()
       navigate(`/summary/${finalized.id}`, { replace: true })
       return
@@ -83,9 +132,23 @@ export default function ScoreboardPage() {
     setCurrentGame(nextGame)
     setGame(nextGame)
     setRoundValues({})
+
+    // Update Firebase if shared
+    if (isShared && shareCode) {
+      updateSharedGame(shareCode, nextGame).catch((err) => {
+        console.error('Error updating shared game:', err)
+      })
+      // Send system message
+      if (user) {
+        const playerName = user?.displayName || user?.email || 'Un joueur'
+        sendSystemMessage(shareCode, `${playerName} ${t('addedRound') || 'a ajouté un round'}`).catch((err) => {
+          console.error('Error sending system message:', err)
+        })
+      }
+    }
   }
 
-  function onEndGame() {
+  async function onEndGame() {
     const finalTotals = rankPlayers(game).totals
     const finalized = {
       ...game,
@@ -93,6 +156,17 @@ export default function ScoreboardPage() {
       finalTotals,
     }
     saveGameToHistory(finalized)
+    
+    // Update user stats
+    if (user?.uid) {
+      updateUserStats(user.uid, finalized).catch(() => {})
+    }
+    
+    // Send system message
+    if (isShared && shareCode) {
+      sendSystemMessage(shareCode, t('gameEnded') || 'La partie a été terminée').catch(() => {})
+    }
+    
     clearCurrentGame()
     navigate(`/summary/${finalized.id}`, { replace: true })
   }
@@ -108,22 +182,36 @@ export default function ScoreboardPage() {
         <div className="stack">
           <div className="row">
             <div>
-              <h2 style={{ margin: 0 }}>صفحة السكور</h2>
+              <h2 style={{ margin: 0 }}>{t('scoreboardTitle')}</h2>
               <p className="muted" style={{ margin: '6px 0 0' }}>
-                أقل مجموع هو الأحسن. أدخل 0 أو أرقام موجبة فقط. اللعبة تتوقف آليًا إذا أي لاعب وصل{' '}
-                {MAX_TOTAL_SCORE} نقطة.
+                {t('scoreboardSubtitle', { max: MAX_TOTAL_SCORE })}
               </p>
             </div>
-            <span className="pill">{game.type === 'tunisian' ? 'Tunisian Rami' : 'Rami'}</span>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <span className="pill">{game.type === 'tunisian' ? t('tunisianRami') : 'Rami'}</span>
+              {isShared && shareCode && (
+                <span
+                  className="pill"
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    color: '#fff',
+                    border: 'none',
+                    fontWeight: 700,
+                  }}
+                >
+                  {t('shareCode', { code: shareCode })}
+                </span>
+              )}
+            </div>
           </div>
 
           <div style={{ overflowX: 'auto' }}>
             <table className="table">
               <thead>
                 <tr>
-                    <th>اللاعب</th>
-                    <th>مجموع النقاط</th>
-                    <th>الترتيب</th>
+                    <th>{t('player')}</th>
+                    <th>{t('totalScore')}</th>
+                    <th>{t('rank')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -143,15 +231,15 @@ export default function ScoreboardPage() {
       <Card>
         <div className="stack">
           <div className="row">
-            <h3 style={{ margin: 0 }}>دورة جديدة</h3>
-            <span className="pill">عدد الدورات: {(game.rounds || []).length}</span>
+            <h3 style={{ margin: 0 }}>{t('newRound')}</h3>
+            <span className="pill">{t('roundsCount', { count: (game.rounds || []).length })}</span>
           </div>
 
           {error ? <div className="field__error">{error}</div> : null}
 
           <div className="grid-2">
             {game.players.map((p) => (
-              <Field key={p.id} label={p.name} hint="أدخل 0 أو رقم موجب فقط.">
+              <Field key={p.id} label={p.name} hint={t('enterScore')}>
                 <NumberInput
                   value={roundValues[p.id] ?? ''}
                   min={undefined}
@@ -177,14 +265,14 @@ export default function ScoreboardPage() {
 
           <div className="row">
             <Button variant="secondary" onClick={onAddRound}>
-              إضافة دورة
+              {t('addRound')}
             </Button>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <Button variant="ghost" onClick={onResetGame}>
-                إلغاء اللعبة
+                {t('discardGame')}
               </Button>
               <Button variant="primary" onClick={onEndGame} disabled={(game.rounds || []).length === 0}>
-                وفّى اللعب
+                {t('endGame')}
               </Button>
             </div>
           </div>
@@ -195,14 +283,14 @@ export default function ScoreboardPage() {
         <Card>
           <div className="stack">
             <div className="row">
-              <h3 style={{ margin: 0 }}>قائمة الدورات (آخر وحدة فوق)</h3>
-              <span className="muted">المجموع يتحسب أوتوماتيكياً</span>
+              <h3 style={{ margin: 0 }}>{t('roundsList')}</h3>
+              <span className="muted">{t('totalsAuto')}</span>
             </div>
             <div style={{ overflowX: 'auto' }}>
               <table className="table">
                 <thead>
                   <tr>
-                    <th>الدورة</th>
+                    <th>{t('round')}</th>
                     {game.players.map((p) => (
                       <th key={p.id}>{p.name}</th>
                     ))}
@@ -221,7 +309,7 @@ export default function ScoreboardPage() {
                   ))}
                   <tr>
                     <td>
-                      <strong>Total</strong>
+                      <strong>{t('total')}</strong>
                     </td>
                     {game.players.map((p) => (
                       <td key={p.id} className="input--mono">
@@ -235,6 +323,12 @@ export default function ScoreboardPage() {
           </div>
         </Card>
       ) : null}
+
+      {isShared && shareCode && (
+        <Card>
+          <ChatBox gameCode={shareCode} userName={user?.displayName} />
+        </Card>
+      )}
     </div>
   )
 }

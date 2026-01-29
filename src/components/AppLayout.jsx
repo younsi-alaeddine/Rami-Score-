@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import Button from './Button.jsx'
 import { getStoredTheme, setStoredTheme } from '../utils/theme.js'
+import { getStoredLanguage, setStoredLanguage, t } from '../utils/i18n.js'
 
 export default function AppLayout() {
   const location = useLocation()
@@ -12,6 +13,7 @@ export default function AppLayout() {
       return 'light'
     }
   })
+  const [lang, setLang] = useState(() => getStoredLanguage())
 
   useEffect(() => {
     try {
@@ -21,7 +23,24 @@ export default function AppLayout() {
     }
   }, [theme])
 
+  useEffect(() => {
+    // Set RTL for Arabic
+    if (lang === 'ar-tn') {
+      document.documentElement.setAttribute('dir', 'rtl')
+      document.documentElement.setAttribute('lang', 'ar')
+    } else {
+      document.documentElement.setAttribute('dir', 'ltr')
+      document.documentElement.setAttribute('lang', 'fr')
+    }
+  }, [lang])
+
   const showBack = useMemo(() => location.pathname !== '/', [location.pathname])
+
+  function changeLanguage(newLang) {
+    setStoredLanguage(newLang)
+    setLang(newLang)
+    window.location.reload()
+  }
 
   return (
     <div className="app">
@@ -30,27 +49,43 @@ export default function AppLayout() {
           <div className="topbar__left">
             {showBack ? (
               <Link className="topbar__home" to="/">
-                الرئيسية
+                {t('home')}
               </Link>
             ) : (
-              <span className="topbar__home topbar__home--muted">الرئيسية</span>
+              <span className="topbar__home topbar__home--muted">{t('home')}</span>
             )}
           </div>
 
           <div className="topbar__center">
             <Link to="/" className="topbar__title">
-              Rami Score – تونسي
+              {t('appTitle')}
             </Link>
           </div>
 
-          <div className="topbar__right">
+          <div className="topbar__right" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <select
+              value={lang}
+              onChange={(e) => changeLanguage(e.target.value)}
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                padding: '6px 8px',
+                fontSize: '12px',
+                color: 'var(--text)',
+                cursor: 'pointer',
+              }}
+            >
+              <option value="fr">{t('french')}</option>
+              <option value="ar-tn">{t('tunisian')}</option>
+            </select>
             <Button
               variant="ghost"
               size="sm"
-              aria-label="تفعيل/إيقاف الوضع الليلي"
+              aria-label={theme === 'dark' ? t('lightMode') : t('darkMode')}
               onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
             >
-              {theme === 'dark' ? 'نهار' : 'ليل'}
+              {theme === 'dark' ? t('lightMode') : t('darkMode')}
             </Button>
           </div>
         </div>
@@ -58,13 +93,13 @@ export default function AppLayout() {
 
       <main className="container">
         <div className="disclaimer" role="note">
-          التطبيق هذا لحساب النقاط فقط وما فيه حتى علاقة بالقمار ولا بالفلوس.
+          {t('disclaimer')}
         </div>
         <Outlet />
       </main>
 
       <footer className="footer">
-        <span>Offline-first. Local storage only.</span>
+        <span>{t('offlineFirst')}</span>
       </footer>
     </div>
   )

@@ -50,6 +50,20 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* RTL support for Arabic */
+html[dir='rtl'] {
+  direction: rtl;
+}
+
+html[dir='rtl'] .row {
+  flex-direction: row-reverse;
+}
+
+html[dir='rtl'] .table th,
+html[dir='rtl'] .table td {
+  text-align: right;
+}
+
 a {
   color: inherit;
   text-decoration: none;

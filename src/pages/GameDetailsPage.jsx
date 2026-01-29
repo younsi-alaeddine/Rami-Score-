@@ -4,6 +4,7 @@ import Button from '../components/Button.jsx'
 import Card from '../components/Card.jsx'
 import { deleteGame, getGameById } from '../storage/history.js'
 import { formatDateTime } from '../utils/date.js'
+import { t } from '../utils/i18n.js'
 
 export default function GameDetailsPage() {
   const { gameId } = useParams()
@@ -42,21 +43,21 @@ export default function GameDetailsPage() {
         <div className="stack">
           <div className="row">
             <div>
-              <h2 style={{ margin: 0 }}>Game Details</h2>
+              <h2 style={{ margin: 0 }}>{t('gameDetailsTitle')}</h2>
               <p className="muted" style={{ margin: '6px 0 0' }}>
                 {formatDateTime(game.endedAt || game.createdAt)}
               </p>
             </div>
-            <span className="pill">{game.type === 'tunisian' ? 'Tunisian Rami' : 'Rami'}</span>
+            <span className="pill">{game.type === 'tunisian' ? t('tunisianRami') : 'Rami'}</span>
           </div>
 
           <div style={{ overflowX: 'auto' }}>
             <table className="table">
               <thead>
                 <tr>
-                  <th>Rank</th>
-                  <th>Player</th>
-                  <th>Final Score</th>
+                  <th>{t('rank')}</th>
+                  <th>{t('player')}</th>
+                  <th>{t('totalScore')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -73,12 +74,12 @@ export default function GameDetailsPage() {
 
           {(game.rounds || []).length ? (
             <div className="stack">
-              <h3 style={{ margin: 0 }}>Rounds</h3>
+              <h3 style={{ margin: 0 }}>{t('roundsList')}</h3>
               <div style={{ overflowX: 'auto' }}>
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>Round</th>
+                      <th>{t('round')}</th>
                       {game.players.map((p) => (
                         <th key={p.id}>{p.name}</th>
                       ))}
@@ -103,10 +104,10 @@ export default function GameDetailsPage() {
 
           <div className="row">
             <Button as={Link} to="/history" variant="secondary">
-              Back to History
+              {t('backToHistory')}
             </Button>
             <Button variant="ghost" onClick={onDelete}>
-              Delete Game
+              {t('deleteGame')}
             </Button>
           </div>
         </div>
