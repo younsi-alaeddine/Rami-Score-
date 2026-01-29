@@ -14,6 +14,7 @@ export default function FriendsPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [myCode, setMyCode] = useState('')
+  const [presence, setPresence] = useState({})
 
   useEffect(() => {
     if (!user) return
@@ -21,6 +22,18 @@ export default function FriendsPage() {
     setMyCode(generateFriendCode(user.uid))
     loadFriends()
   }, [user])
+
+  // Souscrire au statut en ligne de chaque ami
+  useEffect(() => {
+    if (friends.length === 0) return
+
+    const unsubs = friends.map((f) =>
+      subscribeToPresence(f.id, (data) => {
+        setPresence((prev) => ({ ...prev, [f.id]: data }))
+      })
+    )
+    return () => unsubs.forEach((u) => u())
+  }, [friends])
 
   async function loadFriends() {
     try {
