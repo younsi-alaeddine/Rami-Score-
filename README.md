@@ -2,6 +2,8 @@
 
 تطبيق ويب لحساب ومتابعة **سكورات لعبة الرامي التونسي**. Offline d'abord, avec option de partage en temps réel (Firebase).
 
+**🌐 Site en ligne / Live demo:** [https://rami-score.vercel.app](https://rami-score.vercel.app)
+
 **تنبيه قانوني (مهم):** التطبيق هذا لحساب النقاط فقط وما فيه حتى علاقة بالقمار ولا بالفلوس.  
 **Legal disclaimer:** This app calculates scores only. No gambling or money involved.
 
