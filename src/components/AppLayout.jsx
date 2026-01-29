@@ -16,6 +16,7 @@ export default function AppLayout() {
   const [showNameModal, setShowNameModal] = useState(false)
   const [nameInput, setNameInput] = useState('')
   const [nameSaving, setNameSaving] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [theme, setTheme] = useState(() => {
     try {
       return getStoredTheme()
@@ -79,6 +80,11 @@ export default function AppLayout() {
   function openNameModal() {
     setNameInput(user?.displayName || 'Joueur Anonyme' || '')
     setShowNameModal(true)
+    setMenuOpen(false)
+  }
+
+  function closeMenu() {
+    setMenuOpen(false)
   }
 
   async function handleSaveName() {
@@ -116,97 +122,199 @@ export default function AppLayout() {
           </div>
 
           <div className="topbar__right">
+            {/* Desktop: tout visible */}
+            <div className="topbar__desktop">
+              {showGoogleButton && (
+                <div className="topbar__group">
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={googleLoading}
+                  className="btn-google topbar__btn"
+                  aria-label={t('signInWithGoogle')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 10px',
+                    borderRadius: 'var(--radius-pill)',
+                    border: '1px solid var(--glass-border)',
+                    background: 'var(--glass-bg)',
+                    color: 'var(--text)',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: googleLoading ? 'wait' : 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                    <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+                    <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.26c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
+                    <path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V5.658H.957C.347 6.883 0 8.21 0 9.5c0 1.29.348 2.617.957 3.842l3.007-2.332z" fill="#FBBC05"/>
+                    <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 5.158L3.964 7.49C4.672 5.364 6.656 3.58 9 3.58z" fill="#EA4335"/>
+                  </svg>
+                  <span className="btn-google__text">{googleLoading ? t('connecting') : t('signInWithGoogle')}</span>
+                </button>
+                </div>
+              )}
+              {showUserBlock && (
+                <div className="topbar__group">
+                <div className="topbar__user">
+                  {user.photoURL ? (
+                    <img src={user.photoURL} alt="" className="topbar__avatar" />
+                  ) : (
+                    <span className="topbar__avatar topbar__avatar--init" title={user.displayName || ''}>
+                      {(user.displayName || 'J')[0].toUpperCase()}
+                    </span>
+                  )}
+                  <span className="topbar__name" title={user.displayName || ''}>
+                    {user.displayName || t('signedIn')}
+                  </span>
+                  {user.isAnonymous && (
+                    <Button variant="ghost" size="sm" className="topbar__btn-name" onClick={openNameModal} aria-label={t('changeMyName')}>
+                      <span className="topbar__btn-name-text">{t('changeMyName')}</span>
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="sm" onClick={handleSignOut} aria-label={t('signOut')}>
+                    {t('signOut')}
+                  </Button>
+                </div>
+                </div>
+              )}
+              <div className="topbar__group topbar__group--settings">
+              <select
+                value={lang}
+                onChange={(e) => changeLanguage(e.target.value)}
+                className="topbar__select"
+                style={{
+                  background: 'var(--glass-bg)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid var(--glass-border)',
+                  borderRadius: 'var(--radius-pill)',
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--text)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.boxShadow = '0 0 0 3px var(--primary-soft)'
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.boxShadow = 'none'
+                }}
+              >
+                <option value="fr">🇫🇷 {t('french')}</option>
+                <option value="ar-tn">🇹🇳 {t('tunisian')}</option>
+              </select>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="topbar__theme-btn"
+                aria-label={theme === 'dark' ? t('lightMode') : t('darkMode')}
+                onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+              >
+                {theme === 'dark' ? '☀️' : '🌙'}
+              </Button>
+              </div>
+            </div>
+
+            {/* Mobile: bouton menu seul */}
+            <button
+              type="button"
+              className="topbar__menu-btn"
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label={menuOpen ? t('close') : t('menu')}
+              aria-expanded={menuOpen}
+            >
+              {user ? (
+                user.photoURL ? (
+                  <img src={user.photoURL} alt="" className="topbar__avatar" />
+                ) : (
+                  <span className="topbar__avatar topbar__avatar--init">
+                    {(user.displayName || 'J')[0].toUpperCase()}
+                  </span>
+                )
+              ) : (
+                <span className="topbar__menu-icon" aria-hidden>☰</span>
+              )}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Menu déroulant mobile */}
+      {menuOpen && (
+        <>
+          <div
+            className="topbar__backdrop"
+            onClick={closeMenu}
+            onKeyDown={(e) => e.key === 'Escape' && closeMenu()}
+            role="button"
+            tabIndex={-1}
+            aria-label={t('close')}
+          />
+          <div className="topbar__dropdown">
+            {showUserBlock && (
+              <div className="topbar__dropdown-user">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="" className="topbar__avatar topbar__avatar--lg" />
+                ) : (
+                  <span className="topbar__avatar topbar__avatar--lg topbar__avatar--init">
+                    {(user.displayName || 'J')[0].toUpperCase()}
+                  </span>
+                )}
+                <span className="topbar__dropdown-name">{user.displayName || t('signedIn')}</span>
+                {user.isAnonymous && (
+                  <Button variant="ghost" size="sm" onClick={openNameModal} style={{ marginTop: 4 }}>
+                    {t('changeMyName')}
+                  </Button>
+                )}
+                <Button variant="ghost" size="sm" onClick={() => { handleSignOut(); closeMenu(); }} style={{ marginTop: 4 }}>
+                  {t('signOut')}
+                </Button>
+              </div>
+            )}
             {showGoogleButton && (
               <button
                 type="button"
-                onClick={handleGoogleSignIn}
+                onClick={() => { handleGoogleSignIn(); closeMenu(); }}
                 disabled={googleLoading}
-                className="btn-google topbar__btn"
-                aria-label={t('signInWithGoogle')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 10px',
-                  borderRadius: 'var(--radius-pill)',
-                  border: '1px solid var(--glass-border)',
-                  background: 'var(--glass-bg)',
-                  color: 'var(--text)',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  cursor: googleLoading ? 'wait' : 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
+                className="topbar__dropdown-google"
               >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                <svg width="20" height="20" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
                   <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.26c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
                   <path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V5.658H.957C.347 6.883 0 8.21 0 9.5c0 1.29.348 2.617.957 3.842l3.007-2.332z" fill="#FBBC05"/>
                   <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 5.158L3.964 7.49C4.672 5.364 6.656 3.58 9 3.58z" fill="#EA4335"/>
                 </svg>
-                <span className="btn-google__text">{googleLoading ? t('connecting') : t('signInWithGoogle')}</span>
+                {googleLoading ? t('connecting') : t('signInWithGoogle')}
               </button>
             )}
-            {showUserBlock && (
-              <div className="topbar__user">
-                {user.photoURL ? (
-                  <img src={user.photoURL} alt="" className="topbar__avatar" />
-                ) : (
-                  <span className="topbar__avatar topbar__avatar--init" title={user.displayName || ''}>
-                    {(user.displayName || 'J')[0].toUpperCase()}
-                  </span>
-                )}
-                <span className="topbar__name" title={user.displayName || ''}>
-                  {user.displayName || t('signedIn')}
-                </span>
-                {user.isAnonymous && (
-                  <Button variant="ghost" size="sm" className="topbar__btn-name" onClick={openNameModal} aria-label={t('changeMyName')}>
-                    <span className="topbar__btn-name-text">{t('changeMyName')}</span>
-                  </Button>
-                )}
-                <Button variant="ghost" size="sm" onClick={handleSignOut} aria-label={t('signOut')}>
-                  {t('signOut')}
-                </Button>
-              </div>
-            )}
-            <select
-              value={lang}
-              onChange={(e) => changeLanguage(e.target.value)}
-              className="topbar__select"
-              style={{
-                background: 'var(--glass-bg)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid var(--glass-border)',
-                borderRadius: 'var(--radius-pill)',
-                padding: '6px 10px',
-                fontSize: '12px',
-                fontWeight: 600,
-                color: 'var(--text)',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.boxShadow = '0 0 0 3px var(--primary-soft)'
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.boxShadow = 'none'
-              }}
-            >
-              <option value="fr">🇫🇷 {t('french')}</option>
-              <option value="ar-tn">🇹🇳 {t('tunisian')}</option>
-            </select>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="topbar__theme-btn"
-              aria-label={theme === 'dark' ? t('lightMode') : t('darkMode')}
+            <div className="topbar__dropdown-row">
+              <label className="topbar__dropdown-label">{t('language')}</label>
+              <select
+                value={lang}
+                onChange={(e) => changeLanguage(e.target.value)}
+                className="topbar__select"
+                style={{ flex: 1, padding: '8px 12px' }}
+              >
+                <option value="fr">🇫🇷 {t('french')}</option>
+                <option value="ar-tn">🇹🇳 {t('tunisian')}</option>
+              </select>
+            </div>
+            <button
+              type="button"
+              className="topbar__dropdown-theme"
               onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+              aria-label={theme === 'dark' ? t('lightMode') : t('darkMode')}
             >
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </Button>
+              {theme === 'dark' ? '☀️ ' + t('lightMode') : '🌙 ' + t('darkMode')}
+            </button>
           </div>
-        </div>
-      </header>
+        </>
+      )}
 
       <a href="#main" className="skip-link">
         {t('skipToContent') || 'Aller au contenu'}
