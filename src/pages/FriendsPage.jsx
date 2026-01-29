@@ -25,14 +25,19 @@ export default function FriendsPage() {
 
   // Souscrire au statut en ligne de chaque ami
   useEffect(() => {
-    if (friends.length === 0) return
+    const withId = (friends || []).filter((f) => f && f.id)
+    if (withId.length === 0) return
 
-    const unsubs = friends.map((f) =>
-      subscribeToPresence(f.id, (data) => {
-        setPresence((prev) => ({ ...prev, [f.id]: data }))
-      })
-    )
-    return () => unsubs.forEach((u) => u())
+    const unsubs = withId.map((f) => {
+      try {
+        return subscribeToPresence(f.id, (data) => {
+          setPresence((prev) => ({ ...prev, [f.id]: data }))
+        })
+      } catch (_) {
+        return () => {}
+      }
+    })
+    return () => unsubs.forEach((u) => u && typeof u === 'function' && u())
   }, [friends])
 
   async function loadFriends() {
@@ -176,9 +181,9 @@ export default function FriendsPage() {
           <div className="stack">
             <h3 style={{ margin: 0 }}>{t('friendsList') || 'Liste des amis'}</h3>
             <div style={{ display: 'grid', gap: '8px' }}>
-              {friends.map((friend) => (
+              {(friends || []).map((friend, index) => (
                 <div
-                  key={friend.id}
+                  key={friend?.id ?? `friend-${index}`}
                   style={{
                     padding: '12px',
                     borderRadius: '12px',
@@ -210,7 +215,7 @@ export default function FriendsPage() {
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontWeight: 600 }}>{friend.name || 'Ami'}</span>
-                        {presence[friend.id]?.online ? (
+                        {presence[friend?.id]?.online ? (
                           <span style={{ fontSize: '10px', color: 'var(--success)', fontWeight: 600 }} title={t('online')}>
                             🟢
                           </span>
@@ -223,7 +228,7 @@ export default function FriendsPage() {
                       </div>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => handleRemoveFriend(friend.id)}>
+                  <Button variant="ghost" size="sm" onClick={() => friend?.id && handleRemoveFriend(friend.id)}>
                     {t('remove') || 'Retirer'}
                   </Button>
                 </div>

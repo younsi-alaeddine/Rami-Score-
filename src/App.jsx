@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AppLayout from './components/AppLayout.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 import Skeleton from './components/Skeleton.jsx'
 
 const HomePage = lazy(() => import('./pages/HomePage.jsx'))
@@ -26,8 +27,9 @@ function PageFallback() {
 
 export default function App() {
   return (
-    <Suspense fallback={<PageFallback />}>
-      <Routes>
+    <ErrorBoundary>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/new" element={<NewGamePage />} />
@@ -41,8 +43,9 @@ export default function App() {
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Route>
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
   )
 }
 

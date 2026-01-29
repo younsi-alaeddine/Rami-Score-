@@ -103,6 +103,8 @@ const translations = {
     notFound: 'Page non trouvée',
     notFoundSubtitle: 'La page que vous recherchez n\'existe pas.',
     goHome: 'Retour à l\'accueil',
+    errorOccurred: 'Une erreur est survenue',
+    errorOccurredHint: 'Rechargez la page ou retournez à l\'accueil.',
     skipToContent: 'Aller au contenu',
     
     // Chat
@@ -275,6 +277,8 @@ const translations = {
     notFound: 'الصفحة غير موجودة',
     notFoundSubtitle: 'الصفحة التي تبحث عنها غير موجودة.',
     goHome: 'العودة إلى الرئيسية',
+    errorOccurred: 'حدث خطأ',
+    errorOccurredHint: 'حدّث الصفحة أو ارجع للرئيسية.',
     skipToContent: 'الانتقال إلى المحتوى',
     
     // Chat
