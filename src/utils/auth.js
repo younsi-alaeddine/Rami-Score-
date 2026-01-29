@@ -16,10 +16,28 @@ export function onAuthChange(callback) {
 // Sign in anonymously (quick access)
 export async function signInAnon() {
   try {
+    console.log('🔐 Tentative d\'authentification anonyme...')
     const userCredential = await signInAnonymously(auth)
-    await createUserProfile(userCredential.user.uid, { displayName: 'Joueur Anonyme' })
+    console.log('✅ Authentification anonyme réussie:', userCredential.user.uid)
+    
+    // Create profile asynchronously (don't block on this)
+    createUserProfile(userCredential.user.uid, { displayName: 'Joueur Anonyme' }).catch((err) => {
+      console.warn('⚠️ Erreur lors de la création du profil (non bloquant):', err)
+    })
+    
     return userCredential.user
   } catch (error) {
+    console.error('❌ Erreur d\'authentification anonyme:', error.code, error.message)
+    
+    // Provide more helpful error messages
+    if (error.code === 'auth/operation-not-allowed') {
+      throw new Error('L\'authentification anonyme n\'est pas activée dans Firebase Console.')
+    } else if (error.code === 'auth/network-request-failed') {
+      throw new Error('Problème de connexion réseau. Vérifiez votre connexion internet.')
+    } else if (error.code === 'auth/too-many-requests') {
+      throw new Error('Trop de tentatives. Veuillez réessayer plus tard.')
+    }
+    
     throw error
   }
 }

@@ -33,6 +33,9 @@ export default function HomePage() {
               <Button as={Link} to="/stats" variant="ghost">
                 📊 {t('myStats')}
               </Button>
+              <Button as={Link} to="/friends" variant="ghost">
+                👥 {t('myFriends') || 'Mes Amis'}
+              </Button>
             </div>
           </div>
         </div>

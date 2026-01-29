@@ -9,6 +9,7 @@ import EndGameSummaryPage from './pages/EndGameSummaryPage.jsx'
 import HistoryPage from './pages/HistoryPage.jsx'
 import GameDetailsPage from './pages/GameDetailsPage.jsx'
 import StatsPage from './pages/StatsPage.jsx'
+import FriendsPage from './pages/FriendsPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/history/:gameId" element={<GameDetailsPage />} />
         <Route path="/stats" element={<StatsPage />} />
+        <Route path="/friends" element={<FriendsPage />} />
         <Route path="/404" element={<NotFoundPage />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Route>

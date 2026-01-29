@@ -3,16 +3,16 @@
 ## 🎨 DESIGN & UI/UX (Priorité HAUTE)
 
 ### 1. Design System Moderne
-- [ ] **Palette de couleurs tunisienne**
-  - [ ] Couleurs inspirées de la Tunisie (bleu/blanc/rouge subtils)
-  - [ ] Dégradés modernes et vibrants
-  - [ ] Mode sombre avec couleurs chaudes (pas juste noir/gris)
+- [x] **Palette de couleurs tunisienne**
+  - [x] Couleurs inspirées de la Tunisie (bleu/blanc/rouge subtils)
+  - [x] Dégradés modernes et vibrants
+  - [x] Mode sombre avec couleurs chaudes (pas juste noir/gris)
 
-- [ ] **Typographie améliorée**
-  - [ ] Police arabe élégante (ex: Tajawal, Cairo)
-  - [ ] Police latine moderne (ex: Inter, Poppins)
-  - [ ] Tailles de texte responsive
-  - [ ] Hiérarchie visuelle claire
+- [x] **Typographie améliorée**
+  - [x] Police arabe élégante (Cairo)
+  - [x] Police latine moderne (Inter)
+  - [x] Tailles de texte responsive
+  - [x] Hiérarchie visuelle claire
 
 - [ ] **Icônes et illustrations**
   - [ ] Icônes personnalisées (cartes, joueurs, trophées)
@@ -45,10 +45,10 @@
   - [ ] Loading states élégants (skeleton screens)
   - [ ] Animations d'apparition (fade-in, scale)
 
-- [ ] **Micro-interactions**
-  - [ ] Feedback visuel sur chaque action
+- [x] **Micro-interactions**
+  - [x] Feedback visuel sur chaque action
   - [ ] Animations de score (compteur qui monte)
-  - [ ] Confetti/celebration quand quelqu'un gagne
+  - [x] Confetti/celebration quand quelqu'un gagne
   - [ ] Animations de cartes qui se retournent
 
 - [ ] **Animations de données**
@@ -61,8 +61,8 @@
 ## 🎮 FONCTIONNALITÉS SOCIALES (Priorité HAUTE)
 
 ### 4. Aspect Communautaire & Amis
-- [ ] **Système d'amis**
-  - [ ] Ajouter des amis par code/nom
+- [x] **Système d'amis**
+  - [x] Ajouter des amis par code/nom
   - [ ] Liste d'amis avec statut (en ligne/hors ligne)
   - [ ] Historique des parties avec amis
   - [ ] Défis entre amis
@@ -80,8 +80,8 @@
   - [ ] Streaks (séries de victoires)
 
 ### 5. Chat & Communication Améliorés
-- [ ] **Chat enrichi**
-  - [ ] Emojis tunisiens (🇹🇳, expressions Darja)
+- [x] **Chat enrichi**
+  - [x] Emojis tunisiens (🇹🇳, expressions Darja)
   - [ ] Stickers/GIFs
   - [ ] Messages vocaux
   - [ ] Réactions aux messages (👍❤️😂)

@@ -16,7 +16,7 @@ function normalizeName(name, idx) {
 
 export default function NewGamePage() {
   const navigate = useNavigate()
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, authError, retryAuth } = useAuth()
   const [playerCount, setPlayerCount] = useState(4)
   const [names, setNames] = useState(() => Array.from({ length: 6 }, () => ''))
   const [type, setType] = useState('tunisian')
@@ -48,8 +48,25 @@ export default function NewGamePage() {
 
       // Check if user is authenticated
       if (!user) {
-        alert(t('authRequired') || 'Authentification requise pour partager une partie. Veuillez rafraîchir la page.')
-        return
+        const retry = confirm(
+          (t('authRequired') || 'Authentification requise pour partager une partie.') +
+          '\n\n' +
+          (authError
+            ? `Erreur: ${authError.message || authError.code || 'Inconnue'}\n\n`
+            : '') +
+          (t('retryAuth') || 'Voulez-vous réessayer l\'authentification ?')
+        )
+        if (retry && retryAuth) {
+          await retryAuth()
+          // Check again after retry - but don't recurse, just alert
+          if (!user) {
+            alert(t('authRequired') || 'Authentification toujours requise. Veuillez rafraîchir la page.')
+            return
+          }
+          // If we have user now, continue below
+        } else {
+          return
+        }
       }
 
       setLoading(true)
@@ -137,6 +154,51 @@ export default function NewGamePage() {
                 {t('shareRealTime')}
               </span>
             </label>
+            
+            {shareMode && !user && !authLoading && (
+              <div
+                style={{
+                  padding: '12px',
+                  borderRadius: '12px',
+                  background: 'rgba(255, 193, 7, 0.1)',
+                  border: '1px solid rgba(255, 193, 7, 0.3)',
+                  fontSize: '13px',
+                  color: 'var(--text)',
+                }}
+              >
+                <div style={{ fontWeight: 600, marginBottom: '4px' }}>
+                  ⚠️ {t('authRequired') || 'Authentification requise'}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '8px' }}>
+                  {authError
+                    ? `Erreur: ${authError.message || authError.code || 'Inconnue'}`
+                    : t('authRequiredHint') || 'L\'authentification est nécessaire pour partager une partie.'}
+                </div>
+                {retryAuth && (
+                  <Button variant="ghost" size="sm" onClick={retryAuth}>
+                    🔄 {t('retryAuth') || 'Réessayer'}
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {shareMode && user && (
+              <div
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  background: 'rgba(76, 175, 80, 0.1)',
+                  border: '1px solid rgba(76, 175, 80, 0.3)',
+                  fontSize: '12px',
+                  color: 'var(--text)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                ✅ {t('authReady') || 'Authentification prête'}
+              </div>
+            )}
           </div>
 
           <div className="row">

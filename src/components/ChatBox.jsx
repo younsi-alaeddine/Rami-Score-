@@ -3,6 +3,16 @@ import { sendMessage, subscribeToChat } from '../utils/chat.js'
 import { useAuth } from './AuthProvider.jsx'
 import { t } from '../utils/i18n.js'
 
+// Emojis tunisiens et expressions Darja
+const TUNISIAN_EMOJIS = [
+  '🇹🇳', '😊', '😂', '❤️', '👍', '🔥', '💪', '🎉', '🏆', '🎯',
+  'Yallah', 'Baraka', 'M3alich', 'S7i7', 'Barcha', 'Kif kif', 'Y3aychek',
+]
+
+function insertEmoji(text, emoji) {
+  return text + ' ' + emoji
+}
+
 export default function ChatBox({ gameCode, userName }) {
   const { user } = useAuth()
   const [messages, setMessages] = useState([])
@@ -35,12 +45,15 @@ export default function ChatBox({ gameCode, userName }) {
   return (
     <div
       style={{
-        border: '1px solid var(--border)',
-        borderRadius: '12px',
-        background: 'var(--card)',
+        border: '1px solid var(--glass-border)',
+        borderRadius: 'var(--radius-lg)',
+        background: 'var(--glass-bg)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         display: 'flex',
         flexDirection: 'column',
-        maxHeight: '300px',
+        maxHeight: '400px',
+        boxShadow: 'var(--glass-shadow)',
       }}
     >
       <div
@@ -87,13 +100,30 @@ export default function ChatBox({ gameCode, userName }) {
                 maxWidth: '80%',
               }}
             >
-              <div style={{ fontWeight: 600, fontSize: '11px', color: 'var(--muted)', marginBottom: '2px' }}>
-                {msg.userName}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                <div
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    background: `linear-gradient(135deg, var(--primary), var(--tunisia-red))`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: 700,
+                    fontSize: '10px',
+                    flexShrink: 0,
+                  }}
+                >
+                  {(msg.userName || 'U')[0].toUpperCase()}
+                </div>
+                <div style={{ fontWeight: 600, fontSize: '11px', color: 'var(--muted)' }}>{msg.userName}</div>
+                <div style={{ fontSize: '10px', color: 'var(--muted)', marginLeft: 'auto' }}>
+                  {new Date(msg.timestamp).toLocaleTimeString()}
+                </div>
               </div>
-              <div>{msg.text}</div>
-              <div style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '2px' }}>
-                {new Date(msg.timestamp).toLocaleTimeString()}
-              </div>
+              <div style={{ fontSize: '13px', lineHeight: '1.4' }}>{msg.text}</div>
             </div>
           ))
         )}

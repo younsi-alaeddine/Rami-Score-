@@ -6,31 +6,71 @@ const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [authError, setAuthError] = useState(null)
 
   useEffect(() => {
+    let retryCount = 0
+    const maxRetries = 3
+
     const unsubscribe = onAuthChange(async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser)
         setLoading(false)
+        setAuthError(null)
       } else {
         // Auto sign in anonymously if no user
-        try {
-          const anonUser = await signInAnon()
-          setUser(anonUser)
-        } catch (error) {
-          console.error('Auth error:', error)
-          // Continue without auth if it fails
-          setUser(null)
-        } finally {
-          setLoading(false)
+        const attemptSignIn = async () => {
+          try {
+            setAuthError(null)
+            const anonUser = await signInAnon()
+            setUser(anonUser)
+            setLoading(false)
+            console.log('✅ Authentification anonyme réussie:', anonUser.uid)
+          } catch (error) {
+            console.error('❌ Erreur d\'authentification:', error)
+            setAuthError(error)
+            
+            // Retry logic
+            if (retryCount < maxRetries) {
+              retryCount++
+              console.log(`🔄 Tentative ${retryCount}/${maxRetries}...`)
+              setTimeout(attemptSignIn, 1000 * retryCount) // Exponential backoff
+            } else {
+              console.error('❌ Échec après', maxRetries, 'tentatives')
+              setUser(null)
+              setLoading(false)
+            }
+          }
         }
+
+        attemptSignIn()
       }
     })
 
     return () => unsubscribe()
   }, [])
 
-  return <AuthContext.Provider value={{ user, loading }}>{children}</AuthContext.Provider>
+  // Retry function for manual retry
+  const retryAuth = async () => {
+    setLoading(true)
+    setAuthError(null)
+    try {
+      const anonUser = await signInAnon()
+      setUser(anonUser)
+      console.log('✅ Authentification réussie après retry:', anonUser.uid)
+    } catch (error) {
+      console.error('❌ Erreur lors du retry:', error)
+      setAuthError(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, loading, authError, retryAuth }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {
