@@ -5,6 +5,7 @@ const translations = {
     // Home
     appTitle: 'Rami Score – تونسي',
     appSubtitle: 'Cette application calcule uniquement les scores. Aucun jeu d\'argent ni argent impliqué.',
+    homeTagline: 'Suivez les scores de vos parties entre amis',
     newGame: 'Nouvelle Partie',
     gameHistory: 'Historique',
     joinGame: '🔗 Rejoindre une partie partagée (code)',
@@ -43,6 +44,7 @@ const translations = {
     roundsCount: 'Rondes: {count}',
     enterScore: 'Entrez 0 ou un nombre positif uniquement.',
     addRound: 'Ajouter une Ronde',
+    roundAdded: 'Round ajouté',
     discardGame: 'Annuler la Partie',
     endGame: 'Terminer la Partie',
     roundsList: 'Liste des Rondes (dernière en haut)',
@@ -50,6 +52,13 @@ const translations = {
     round: 'Ronade',
     total: 'Total',
     shareCode: '🔗 Code: {code}',
+    copyCode: 'Copier le code',
+    codeCopied: 'Code copié',
+    inviteFriends: 'Inviter des amis',
+    inviteFriendsSubtitle: 'Partagez le code avec vos amis pour qu\'ils rejoignent la partie.',
+    copyCodeFor: 'Copier le code pour {name}',
+    spectatorsCount: '{count} spectateur(s)',
+    noFriendsToInvite: 'Aucun ami à inviter. Ajoutez des amis depuis la page Amis.',
     
     // Summary
     summaryTitle: 'Résumé Final',
@@ -84,6 +93,9 @@ const translations = {
     language: 'Langue',
     french: 'Français',
     tunisian: 'Tunisien',
+    suggestLanguage: 'Choisir la langue',
+    suggestLanguageSub: 'Utiliser le français ou le tunisien (arabe) ?',
+    useThisLanguage: 'Utiliser cette langue',
     offlineFirst: 'Hors ligne d\'abord. Stockage local + Cloud (Firebase).',
     disclaimer: 'Cette application calcule uniquement les scores. Aucun jeu d\'argent ni argent impliqué.',
     
@@ -91,6 +103,7 @@ const translations = {
     notFound: 'Page non trouvée',
     notFoundSubtitle: 'La page que vous recherchez n\'existe pas.',
     goHome: 'Retour à l\'accueil',
+    skipToContent: 'Aller au contenu',
     
     // Chat
     chat: 'Chat',
@@ -105,6 +118,12 @@ const translations = {
     totalRounds: 'Total rounds',
     averageScore: 'Score moyen',
     bestScore: 'Meilleur score',
+    statsOverview: 'Aperçu des stats',
+    achievements: 'Succès',
+    firstGame: 'Première partie',
+    tenGames: '10 parties',
+    firstWin: 'Première victoire',
+    fiveWins: '5 victoires',
     profile: 'Profil',
     signInRequired: 'Connexion requise',
     noStats: 'Aucune statistique disponible',
@@ -112,6 +131,8 @@ const translations = {
     gameEndedAuto: 'La partie s\'est terminée automatiquement',
     addedRound: 'a ajouté un round',
     shareError: 'Erreur lors de la création de la partie partagée.',
+    shareErrorCheck: 'Vérifiez les règles Realtime Database et que l\'authentification est activée.',
+    permissionDeniedHint: '→ Firebase Console → Realtime Database (pas Firestore) → Règles → Colle les règles du fichier FIREBASE_REGLES_ETAPES.md → Publier.',
     waitingAuth: 'Attente de l\'authentification...',
     authRequired: 'Authentification requise pour partager une partie.',
     authRequiredHint: 'L\'authentification est nécessaire pour partager une partie en temps réel.',
@@ -139,11 +160,22 @@ const translations = {
     cannotAddSelf: 'Vous ne pouvez pas vous ajouter vous-même',
     errorAddingFriend: 'Erreur lors de l\'ajout',
     confirmRemoveFriend: 'Supprimer cet ami ?',
+    
+    // Google auth
+    signInWithGoogle: 'Connexion Google',
+    signOut: 'Déconnexion',
+    signedIn: 'Connecté',
+    changeMyName: 'Changer mon nom',
+    changeMyNameTitle: 'Modifier votre nom',
+    yourName: 'Votre nom',
+    save: 'Enregistrer',
+    googleSignInError: 'Erreur lors de la connexion Google.',
   },
   'ar-tn': {
     // Home
     appTitle: 'Rami Score – تونسي',
     appSubtitle: 'التطبيق هذا لحساب النقاط فقط وما فيه حتى علاقة بالقمار ولا بالفلوس.',
+    homeTagline: 'تابع نقاط لعبك مع أصحابك',
     newGame: 'لعبة جديدة',
     gameHistory: 'سجل الألعاب',
     joinGame: '🔗 انضم إلى لعبة مشتركة (كود)',
@@ -182,6 +214,7 @@ const translations = {
     roundsCount: 'عدد الدورات: {count}',
     enterScore: 'أدخل 0 أو رقم موجب فقط.',
     addRound: 'إضافة دورة',
+    roundAdded: 'تمت إضافة الدورة',
     discardGame: 'إلغاء اللعبة',
     endGame: 'وفّى اللعب',
     roundsList: 'قائمة الدورات (آخر وحدة فوق)',
@@ -189,6 +222,13 @@ const translations = {
     round: 'الدورة',
     total: 'المجموع',
     shareCode: '🔗 كود: {code}',
+    copyCode: 'نسخ الكود',
+    codeCopied: 'تم نسخ الكود',
+    inviteFriends: 'دعوة الأصدقاء',
+    inviteFriendsSubtitle: 'شارك الكود مع أصحابك عشان ينضموا للعبة.',
+    copyCodeFor: 'نسخ الكود لـ {name}',
+    spectatorsCount: '{count} متفرّج(ين)',
+    noFriendsToInvite: 'ما فيش أصحاب لدعوتهم. زد أصحابك من صفحة الأصدقاء.',
     
     // Summary
     summaryTitle: 'النتيجة النهائية',
@@ -223,6 +263,9 @@ const translations = {
     language: 'اللغة',
     french: 'Français',
     tunisian: 'Tunisien',
+    suggestLanguage: 'اختر اللغة',
+    suggestLanguageSub: 'استخدم الفرنسية أو التونسي (العربية)؟',
+    useThisLanguage: 'استخدام هذه اللغة',
     offlineFirst: 'Offline-first. Local storage + Cloud (Firebase).',
     disclaimer: 'التطبيق هذا لحساب النقاط فقط وما فيه حتى علاقة بالقمار ولا بالفلوس.',
     
@@ -230,6 +273,7 @@ const translations = {
     notFound: 'الصفحة غير موجودة',
     notFoundSubtitle: 'الصفحة التي تبحث عنها غير موجودة.',
     goHome: 'العودة إلى الرئيسية',
+    skipToContent: 'الانتقال إلى المحتوى',
     
     // Chat
     chat: 'دردشة',
@@ -244,13 +288,21 @@ const translations = {
     totalRounds: 'إجمالي الجولات',
     averageScore: 'متوسط النقاط',
     bestScore: 'أفضل نتيجة',
+    statsOverview: 'نظرة عامة على الإحصائيات',
+    achievements: 'الإنجازات',
+    firstGame: 'أول لعبة',
+    tenGames: '10 ألعاب',
+    firstWin: 'أول فوز',
+    fiveWins: '5 انتصارات',
     profile: 'الملف الشخصي',
     signInRequired: 'تسجيل الدخول مطلوب',
     noStats: 'لا توجد إحصائيات متاحة',
-    gameEnded: 'انتهت اللعبة',
-    gameEndedAuto: 'انتهت اللعبة تلقائياً',
-    addedRound: 'أضاف جولة',
+    gameEnded: 'خلصت اللعبة',
+    gameEndedAuto: 'اللعبة خلصت براها (وصلنا للحد)',
+    addedRound: 'زاد روند',
     shareError: 'خطأ في إنشاء اللعبة المشتركة.',
+    shareErrorCheck: 'تحقق من قواعد Realtime Database ومن تفعيل المصادقة.',
+    permissionDeniedHint: '→ Firebase Console → Realtime Database (ليس Firestore) → Rules → الصق القواعد من ملف FIREBASE_REGLES_ETAPES.md → Publish.',
     waitingAuth: 'في انتظار المصادقة...',
     authRequired: 'المصادقة مطلوبة لمشاركة لعبة.',
     authRequiredHint: 'المصادقة ضرورية لمشاركة لعبة في الوقت الفعلي.',
@@ -278,10 +330,21 @@ const translations = {
     cannotAddSelf: 'لا يمكنك إضافة نفسك',
     errorAddingFriend: 'خطأ في الإضافة',
     confirmRemoveFriend: 'إزالة هذا الصديق؟',
+    
+    // Google auth
+    signInWithGoogle: 'تسجيل الدخول بـ Google',
+    signOut: 'تسجيل الخروج',
+    signedIn: 'متصل',
+    changeMyName: 'تغيير اسمي',
+    changeMyNameTitle: 'تعديل اسمك',
+    yourName: 'اسمك',
+    save: 'حفظ',
+    googleSignInError: 'خطأ في تسجيل الدخول بـ Google.',
   },
 }
 
 const STORAGE_KEY = 'rami_lang_v1'
+const LANGUAGE_SUGGESTED_KEY = 'rami_lang_suggested_v1'
 
 export function getStoredLanguage() {
   try {
@@ -289,6 +352,38 @@ export function getStoredLanguage() {
     return lang === 'fr' || lang === 'ar-tn' ? lang : 'fr'
   } catch {
     return 'fr'
+  }
+}
+
+/** Détecte la langue du navigateur (fr ou ar-tn si arabe) */
+export function detectBrowserLanguage() {
+  try {
+    const nav = typeof navigator !== 'undefined' ? navigator.language || navigator.userLanguage : ''
+    if (!nav) return null
+    const code = nav.split('-')[0].toLowerCase()
+    if (code === 'ar') return 'ar-tn'
+    if (code === 'fr') return 'fr'
+    return null
+  } catch {
+    return null
+  }
+}
+
+/** True si l'utilisateur n'a jamais choisi de langue (premier lancement) */
+export function shouldSuggestLanguage() {
+  try {
+    return localStorage.getItem(LANGUAGE_SUGGESTED_KEY) !== '1'
+  } catch {
+    return false
+  }
+}
+
+/** Marque la suggestion de langue comme vue (ne plus afficher le bandeau) */
+export function setLanguageSuggested() {
+  try {
+    localStorage.setItem(LANGUAGE_SUGGESTED_KEY, '1')
+  } catch {
+    // ignore
   }
 }
 

@@ -15,36 +15,31 @@ L'erreur "Erreur lors de la création de la partie partagée" indique que Fireba
 
 ### Étape 2 : Remplacer les règles
 
-**Remplace TOUT le contenu** par ces règles :
+**Remplace TOUT le contenu des règles** par ceci (une seule clé `games`, pas de doublon) :
 
 ```json
 {
   "rules": {
+    "games": {
+      "$code": {
+        ".read": true,
+        ".write": "auth != null"
+      }
+    },
     "users": {
       "$uid": {
         ".read": "$uid === auth.uid",
         ".write": "$uid === auth.uid"
-      }
-    },
-    "games": {
-      "$code": {
-        ".read": true,
-        ".write": true
-      }
-    },
-    "games": {
-      "$code": {
-        "chat": {
-          ".read": true,
-          ".write": true
-        }
       }
     }
   }
 }
 ```
 
-**OU** (version plus simple pour tester rapidement) :
+- `games/{code}` : tout le monde peut **lire** ; seuls les utilisateurs **connectés** (y compris anonymes) peuvent **écrire**. Ça permet de créer/mettre à jour une partie et le chat (`games/{code}/chat`).
+- `users/{uid}` : chaque utilisateur ne peut lire/écrire que son propre nœud.
+
+**Alternative (pour débloquer vite en test uniquement)** :
 
 ```json
 {
@@ -55,7 +50,7 @@ L'erreur "Erreur lors de la création de la partie partagée" indique que Fireba
 }
 ```
 
-⚠️ **Note** : Cette dernière version permet tout (lecture/écriture) pour tester. Pour la production, utilise la première version.
+⚠️ Cette version ouvre tout (lecture/écriture). À utiliser seulement pour tester, pas en production.
 
 ### Étape 3 : Publier
 

@@ -1,9 +1,13 @@
 import {
   signInAnonymously,
+  signInWithPopup,
+  linkWithPopup,
+  GoogleAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  updateProfile,
 } from 'firebase/auth'
 import { ref, set, get, update } from 'firebase/database'
 import { auth, db } from '../config/firebase.js'
@@ -40,6 +44,57 @@ export async function signInAnon() {
     
     throw error
   }
+}
+
+// Sign in with Google (or link anonymous account to Google to keep stats)
+export async function signInWithGoogle() {
+  try {
+    const provider = new GoogleAuthProvider()
+    const currentUser = auth.currentUser
+
+    let userCredential
+    if (currentUser?.isAnonymous) {
+      // Link anonymous account to Google so stats are preserved
+      userCredential = await linkWithPopup(currentUser, provider)
+    } else {
+      userCredential = await signInWithPopup(auth, provider)
+    }
+
+    const user = userCredential.user
+    await createUserProfile(user.uid, {
+      displayName: user.displayName || 'Joueur',
+      email: user.email || null,
+      photoURL: user.photoURL || null,
+    }).catch(() => {})
+    return user
+  } catch (error) {
+    if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+      return null
+    }
+    if (error.code === 'auth/credential-already-in-use') {
+      // Anonymous account can't be linked (e.g. Google already used elsewhere) – sign in with Google only
+      return signInWithGoogleNewSession()
+    }
+    if (error.code === 'auth/operation-not-allowed') {
+      throw new Error('La connexion Google n\'est pas activée dans Firebase Console.')
+    }
+    if (error.code === 'auth/popup-blocked') {
+      throw new Error('La fenêtre de connexion a été bloquée. Autorisez les popups pour ce site.')
+    }
+    throw error
+  }
+}
+
+async function signInWithGoogleNewSession() {
+  const provider = new GoogleAuthProvider()
+  const userCredential = await signInWithPopup(auth, provider)
+  const user = userCredential.user
+  await createUserProfile(user.uid, {
+    displayName: user.displayName || 'Joueur',
+    email: user.email || null,
+    photoURL: user.photoURL || null,
+  }).catch(() => {})
+  return user
 }
 
 // Sign in with email/password
@@ -100,6 +155,17 @@ export async function getUserProfile(uid) {
   const userRef = ref(db, `users/${uid}`)
   const snapshot = await get(userRef)
   return snapshot.val()
+}
+
+// Update display name (for anonymous users; also syncs to Realtime DB)
+export async function updateDisplayName(displayName) {
+  const user = auth.currentUser
+  if (!user) throw new Error('Not authenticated')
+
+  const name = (displayName || '').trim() || 'Joueur Anonyme'
+  await updateProfile(user, { displayName: name })
+  await createUserProfile(user.uid, { displayName: name }).catch(() => {})
+  return { ...user, displayName: name }
 }
 
 // Update user stats

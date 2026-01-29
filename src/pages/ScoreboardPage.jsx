@@ -12,6 +12,7 @@ import { ensureNegativeOrZero, rankPlayers, MAX_TOTAL_SCORE } from '../utils/gam
 import { subscribeToGame, updateSharedGame } from '../utils/firebaseGame.js'
 import { updateUserStats } from '../utils/auth.js'
 import { sendSystemMessage } from '../utils/chat.js'
+import { showToast } from '../components/Toast.jsx'
 import { t } from '../utils/i18n.js'
 
 function clampInputString(s) {
@@ -32,6 +33,9 @@ export default function ScoreboardPage() {
   const [error, setError] = useState('')
   const [isShared, setIsShared] = useState(false)
   const [shareCode, setShareCode] = useState(null)
+  const [highlightRoundId, setHighlightRoundId] = useState(null)
+  const [viewerCount, setViewerCount] = useState(0)
+  const [friends, setFriends] = useState([])
 
   useEffect(() => {
     const g = getCurrentGame()
@@ -64,6 +68,27 @@ export default function ScoreboardPage() {
       if (unsubscribe) unsubscribe()
     }
   }, [isShared, shareCode])
+
+  // Register as viewer and subscribe to viewer count
+  useEffect(() => {
+    if (!isShared || !shareCode) return
+
+    registerViewer(shareCode)
+    const unsubViewers = subscribeToViewerCount(shareCode, setViewerCount)
+
+    return () => {
+      unregisterViewer(shareCode)
+      if (unsubViewers) unsubViewers()
+    }
+  }, [isShared, shareCode])
+
+  // Load friends list for invite section
+  useEffect(() => {
+    if (!isShared || !shareCode || !user) return
+
+    const unsub = subscribeToFriends(setFriends)
+    return () => { if (unsub) unsub() }
+  }, [isShared, shareCode, user])
 
   const { ranked, totals } = useMemo(() => {
     if (!game) return { ranked: [], totals: {} }
@@ -132,6 +157,7 @@ export default function ScoreboardPage() {
     setCurrentGame(nextGame)
     setGame(nextGame)
     setRoundValues({})
+    showToast(t('roundAdded') || 'Round ajouté')
 
     // Update Firebase if shared
     if (isShared && shareCode) {
@@ -190,17 +216,35 @@ export default function ScoreboardPage() {
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
               <span className="pill">{game.type === 'tunisian' ? t('tunisianRami') : 'Rami'}</span>
               {isShared && shareCode && (
-                <span
-                  className="pill"
-                  style={{
-                    background: 'linear-gradient(135deg, #10b981, #059669)',
-                    color: '#fff',
-                    border: 'none',
-                    fontWeight: 700,
-                  }}
-                >
-                  {t('shareCode', { code: shareCode })}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span
+                    className="pill"
+                    style={{
+                      background: 'linear-gradient(135deg, #10b981, #059669)',
+                      color: '#fff',
+                      border: 'none',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {t('shareCode', { code: shareCode })}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn btn--ghost btn--sm"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(shareCode).then(() => {
+                        showToast(t('codeCopied') || 'Code copié')
+                      }).catch(() => {})
+                    }}
+                  >
+                    {t('copyCode') || 'Copier le code'}
+                  </button>
+                  {viewerCount > 0 && (
+                    <span className="pill muted" title={t('spectatorsCount', { count: viewerCount })}>
+                      👁 {t('spectatorsCount', { count: viewerCount })}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -250,6 +294,37 @@ export default function ScoreboardPage() {
           </div>
         </div>
       </Card>
+
+      {isShared && shareCode && (
+        <Card>
+          <div className="stack">
+            <h3 style={{ margin: 0 }}>{t('inviteFriends')}</h3>
+            <p className="muted" style={{ margin: '4px 0 0' }}>{t('inviteFriendsSubtitle')}</p>
+            {friends.length === 0 ? (
+              <p className="muted" style={{ margin: '8px 0 0' }}>{t('noFriendsToInvite')}</p>
+            ) : (
+              <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {friends.map((friend) => (
+                  <li key={friend.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                    <span>{friend.name || friend.id}</span>
+                    <button
+                      type="button"
+                      className="btn btn--ghost btn--sm"
+                      onClick={() => {
+                        navigator.clipboard?.writeText(shareCode).then(() => {
+                          showToast(t('codeCopied') || 'Code copié')
+                        }).catch(() => {})
+                      }}
+                    >
+                      {t('copyCode')}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </Card>
+      )}
 
       <Card>
         <div className="stack">
@@ -321,7 +396,10 @@ export default function ScoreboardPage() {
                 </thead>
                 <tbody>
                   {[...(game.rounds || [])].slice().reverse().map((r, idx) => (
-                    <tr key={r.id}>
+                    <tr
+                      key={r.id}
+                      className={r.id === highlightRoundId ? 'round-row round-row--new' : 'round-row'}
+                    >
                       <td>#{(game.rounds || []).length - idx}</td>
                       {game.players.map((p) => (
                         <td key={p.id} className="input--mono">

@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { onAuthChange, signInAnon } from '../utils/auth.js'
+import { setPresenceOnline } from '../utils/presence.js'
 
 const AuthContext = createContext(null)
 
@@ -7,16 +8,27 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [authError, setAuthError] = useState(null)
+  const clearPresenceRef = useRef(null)
 
   useEffect(() => {
     let retryCount = 0
     const maxRetries = 3
 
     const unsubscribe = onAuthChange(async (firebaseUser) => {
+      if (clearPresenceRef.current) {
+        try {
+          clearPresenceRef.current()
+        } catch (_) {}
+        clearPresenceRef.current = null
+      }
+
       if (firebaseUser) {
         setUser(firebaseUser)
         setLoading(false)
         setAuthError(null)
+        try {
+          clearPresenceRef.current = setPresenceOnline(firebaseUser.uid)
+        } catch (_) {}
       } else {
         // Auto sign in anonymously if no user
         const attemptSignIn = async () => {

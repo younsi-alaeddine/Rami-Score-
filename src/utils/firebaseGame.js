@@ -1,5 +1,5 @@
-import { ref, set, onValue, off, push, update } from 'firebase/database'
-import { db } from '../config/firebase.js'
+import { ref, set, onValue, off, push, update, remove, onDisconnect } from 'firebase/database'
+import { db, auth } from '../config/firebase.js'
 
 // Generate a 6-digit code
 export function generateGameCode() {
@@ -71,4 +71,33 @@ export async function checkGameCode(code) {
       { onlyOnce: true },
     )
   })
+}
+
+// Register as viewer (spectator) for a game; removed automatically on disconnect
+export function registerViewer(gameCode) {
+  const user = auth.currentUser
+  if (!user?.uid) return
+
+  const viewerRef = ref(db, `games/${gameCode}/viewers/${user.uid}`)
+  set(viewerRef, { at: new Date().toISOString() }).catch(() => {})
+  onDisconnect(viewerRef).remove().catch(() => {})
+}
+
+// Unregister as viewer (e.g. when leaving the page)
+export function unregisterViewer(gameCode) {
+  const user = auth.currentUser
+  if (!user?.uid) return
+
+  const viewerRef = ref(db, `games/${gameCode}/viewers/${user.uid}`)
+  remove(viewerRef).catch(() => {})
+}
+
+// Subscribe to viewer count for a game
+export function subscribeToViewerCount(gameCode, callback) {
+  const viewersRef = ref(db, `games/${gameCode}/viewers`)
+  onValue(viewersRef, (snapshot) => {
+    const count = snapshot.exists() ? snapshot.numChildren() : 0
+    callback(count)
+  })
+  return () => off(viewersRef)
 }

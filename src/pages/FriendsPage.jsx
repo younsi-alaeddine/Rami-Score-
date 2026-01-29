@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../components/AuthProvider.jsx'
 import { getFriends, addFriend, removeFriend, findUserByCode, generateFriendCode } from '../utils/friends.js'
+import { subscribeToPresence } from '../utils/presence.js'
 import Button from '../components/Button.jsx'
 import Card from '../components/Card.jsx'
 import { Field, TextInput } from '../components/Field.jsx'
@@ -194,7 +195,16 @@ export default function FriendsPage() {
                       {(friend.name || 'A')[0].toUpperCase()}
                     </div>
                     <div>
-                      <div style={{ fontWeight: 600 }}>{friend.name || 'Ami'}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontWeight: 600 }}>{friend.name || 'Ami'}</span>
+                        {presence[friend.id]?.online ? (
+                          <span style={{ fontSize: '10px', color: 'var(--success)', fontWeight: 600 }} title={t('online')}>
+                            🟢
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: '10px', color: 'var(--muted)' }} title={t('offline')}>⚪</span>
+                        )}
+                      </div>
                       <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
                         {t('addedOn') || 'Ajouté le'} {new Date(friend.addedAt).toLocaleDateString()}
                       </div>

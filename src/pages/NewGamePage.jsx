@@ -8,10 +8,17 @@ import { makeId } from '../utils/id.js'
 import { setCurrentGame } from '../storage/currentGame.js'
 import { createSharedGame, generateGameCode } from '../utils/firebaseGame.js'
 import { t } from '../utils/i18n.js'
+import { getStoredLanguage } from '../utils/i18n.js'
+import { getDefaultPlayerName } from '../utils/defaultNames.js'
+
+function getPlaceholder(idx) {
+  return getDefaultPlayerName(idx, getStoredLanguage())
+}
 
 function normalizeName(name, idx) {
   const n = String(name || '').trim()
-  return n.length ? n : `Player ${idx + 1}`
+  const lang = getStoredLanguage()
+  return n.length ? n : getDefaultPlayerName(idx, lang)
 }
 
 export default function NewGamePage() {
@@ -81,7 +88,11 @@ export default function NewGamePage() {
       } catch (err) {
         console.error('Error creating shared game:', err)
         const errorMsg = err.message || err.code || 'Erreur inconnue'
-        alert(`${t('shareError') || 'Erreur lors de la création de la partie partagée.'}\n\nDétails: ${errorMsg}\n\nVérifiez:\n1. Les règles Firebase Realtime Database\n2. Que l'authentification anonyme est activée`)
+        const isPermissionDenied = String(errorMsg).toLowerCase().includes('permission_denied') || err?.code === 'PERMISSION_DENIED'
+        const hint = isPermissionDenied
+          ? (t('permissionDeniedHint') || '→ Firebase Console → Realtime Database (pas Firestore) → Règles → Colle les règles du fichier FIREBASE_REGLES_ETAPES.md → Publier.')
+          : (t('shareErrorCheck') || 'Vérifiez les règles Realtime Database et que l\'authentification est activée.')
+        alert(`${t('shareError') || 'Erreur lors de la création de la partie partagée.'}\n\nDétails: ${errorMsg}\n\n${hint}`)
         setLoading(false)
         return
       }
@@ -136,7 +147,7 @@ export default function NewGamePage() {
                     next[idx] = e.target.value
                     setNames(next)
                   }}
-                  placeholder={`${t('playerName')} ${idx + 1}`}
+                  placeholder={getPlaceholder(idx)}
                 />
               </Field>
             ))}
