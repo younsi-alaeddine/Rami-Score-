@@ -67,17 +67,26 @@ export default function AppLayout() {
               value={lang}
               onChange={(e) => changeLanguage(e.target.value)}
               style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '8px',
-                padding: '6px 8px',
+                background: 'var(--glass-bg)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid var(--glass-border)',
+                borderRadius: 'var(--radius-pill)',
+                padding: '6px 12px',
                 fontSize: '12px',
+                fontWeight: 600,
                 color: 'var(--text)',
                 cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.boxShadow = '0 0 0 3px var(--primary-soft)'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.boxShadow = 'none'
               }}
             >
-              <option value="fr">{t('french')}</option>
-              <option value="ar-tn">{t('tunisian')}</option>
+              <option value="fr">🇫🇷 {t('french')}</option>
+              <option value="ar-tn">🇹🇳 {t('tunisian')}</option>
             </select>
             <Button
               variant="ghost"

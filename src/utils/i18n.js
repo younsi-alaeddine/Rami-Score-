@@ -114,6 +114,7 @@ const translations = {
     shareError: 'Erreur lors de la création de la partie partagée.',
     waitingAuth: 'Attente de l\'authentification...',
     authRequired: 'Authentification requise pour partager une partie.',
+    lowestScore: 'Score le plus bas',
   },
   'ar-tn': {
     // Home
@@ -228,6 +229,7 @@ const translations = {
     shareError: 'خطأ في إنشاء اللعبة المشتركة.',
     waitingAuth: 'في انتظار المصادقة...',
     authRequired: 'المصادقة مطلوبة لمشاركة لعبة.',
+    lowestScore: 'أقل مجموع',
   },
 }
 

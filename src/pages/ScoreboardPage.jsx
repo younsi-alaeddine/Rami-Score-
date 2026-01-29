@@ -216,10 +216,33 @@ export default function ScoreboardPage() {
               </thead>
               <tbody>
                 {ranked.map((p, idx) => (
-                  <tr key={p.id}>
-                    <td>{p.name}</td>
-                    <td className="input--mono">{p.total}</td>
-                    <td>{idx + 1}</td>
+                  <tr key={p.id} className={idx === 0 ? 'winner' : ''} style={{ position: 'relative' }}>
+                    <td>
+                      {idx === 0 && (
+                        <span
+                          style={{
+                            position: 'absolute',
+                            left: '-8px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            fontSize: '20px',
+                          }}
+                        >
+                          👑
+                        </span>
+                      )}
+                      <span style={{ marginLeft: idx === 0 ? '20px' : '0' }}>{p.name}</span>
+                    </td>
+                    <td className="input--mono" style={{ fontWeight: idx === 0 ? 700 : 400, color: idx === 0 ? 'var(--success)' : 'inherit' }}>
+                      {p.total}
+                    </td>
+                    <td>
+                      {idx === 0 ? (
+                        <span className="badge">🥇 {idx + 1}</span>
+                      ) : (
+                        idx + 1
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
